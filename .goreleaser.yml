@@ -1,0 +1,45 @@
+before:
+  hooks:
+    - 'go mod tidy'
+
+builds:
+- env:
+    - 'CGO_ENABLED=0'
+  mod_timestamp: '{{ .CommitTimestamp }}'
+  flags:
+    - '-trimpath'
+  ldflags:
+    - '-s -w -extldflags=-static'
+  targets:
+    - darwin_amd64
+    - darwin_arm64
+    - linux_amd64
+    - linux_arm64
+    - windows_amd64
+    - windows_arm
+  binary: '{{ .ProjectName }}_v{{ .Version }}'
+
+archives:
+- format: 'zip'
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  algorithm: 'sha256'
+
+signs:
+  - artifacts: 'checksum'
+    args:
+      - '--batch'
+      - '--local-user'
+      - '{{ .Env.GPG_FINGERPRINT }}'
+      - '--output'
+      - '${signature}'
+      - '--detach-sign'
+      - '${artifact}'
+
+release:
+  draft: false
+
+changelog:
+  skip: true
