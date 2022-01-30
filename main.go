@@ -36,6 +36,8 @@ func main() {
 			continue
 		}
 
+		v := unicode.ToLower(v)
+
 		if requiredLetter == 0 {
 			requiredLetter = v
 		}
